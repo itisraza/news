@@ -1,0 +1,11 @@
+<div>There are {{ news|length }} news.</div>
+{% for newsRow in news %}
+    <p>{{ newsRow.title }} | <a href="{{ path('deleteNews', { id: newsRow.id }) }}">Delete</a></p>
+{% endfor %}
+
+{% if previous >= 0 %}
+    <a href="{{ path('news', { offset: previous }) }}">Previous</a>
+{% endif %}
+{% if next < news|length %}
+    <a href="{{ path('news', { offset: next }) }}">Next</a>
+{% endif %}
