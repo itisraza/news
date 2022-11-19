@@ -33,38 +33,6 @@ class NewsController extends AbstractController
 
         return new Response('Saved new news with id '.$news->getId());
     }
-    #[Route('/createNewsFromRSS', name: 'create_news_from_rss')]
-    public function createNewsFromRSS(ManagerRegistry $doctrine): Response
-    {
-        $entityManager = $doctrine->getManager();
-        $rss = simplexml_load_file('https://highload.today/category/novosti/feed/');
-        $newsRepository = $doctrine->getRepository(News::class);
-
-        foreach($rss->channel->item as $item){
-            if(!empty($item->title))continue;//skip news without title
-            $news = $newsRepository->findOneBy(['title' => $item->title]);
-            if(!$news){//if it doesn't exist in DB
-                $news = new News();
-                $news->setTitle($item->title);
-                $news->setShortDescription($item->description);
-                $news->setPicture($item->link);
-                $news->setDateAdded(new \DateTime(date("Y-m-d", strtotime($item->pubDate))));
-
-                // tell Doctrine you want to (eventually) save the news (no queries yet)
-                $entityManager->persist($news);
-
-                // actually executes the queries (i.e. the INSERT query)
-                $entityManager->flush();
-            }
-            else{//update just the updated date
-                $news->setDateUpdated(new \DateTime(date("Y-m-d H:i:s")));
-
-                // actually executes the queries (i.e. the UPDATE query)
-                $entityManager->flush();
-            }
-        }
-        return new Response('DONE');
-    }
     #[Route('/deleteNews/{id}', name: 'deleteNews')]
     public function deleteNews(Request $request, NewsRepository $newsRepository, int $id): Response
     {
